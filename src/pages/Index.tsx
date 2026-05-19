@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import Icon from "@/components/ui/icon";
+import AuthModal from "@/components/AuthModal";
 
 const NAV_ITEMS = [
   { id: "hero", label: "Главная" },
@@ -86,9 +87,19 @@ const DOCS = [
   { icon: "Globe", title: "Мультиязычность", desc: "Генерация на 12 языках", time: "5 мин" },
 ];
 
+interface User {
+  id: number;
+  email: string | null;
+  name: string;
+  avatar_url: string | null;
+  provider: string;
+}
+
 export default function Index() {
   const [activeSection, setActiveSection] = useState("hero");
   const [mobileMenu, setMobileMenu] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
 
   const [tone, setTone] = useState<string[]>([]);
   const [style, setStyle] = useState<string[]>([]);
@@ -174,8 +185,31 @@ export default function Index() {
           </div>
 
           <div className="hidden md:flex items-center gap-3">
-            <button className="text-sm text-white/60 hover:text-white transition-colors px-4 py-2">Войти</button>
-            <button className="btn-neon text-sm px-5 py-2 rounded-xl font-semibold">Попробовать бесплатно</button>
+            {user ? (
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 glass rounded-xl px-3 py-1.5">
+                  {user.avatar_url ? (
+                    <img src={user.avatar_url} className="w-6 h-6 rounded-full object-cover" alt="" />
+                  ) : (
+                    <div className="w-6 h-6 rounded-full bg-neon/20 flex items-center justify-center text-neon text-xs font-bold">
+                      {user.name?.[0]?.toUpperCase() || "U"}
+                    </div>
+                  )}
+                  <span className="text-white/80 text-sm font-medium">{user.name}</span>
+                </div>
+                <button
+                  onClick={() => { setUser(null); localStorage.removeItem("auth_token"); }}
+                  className="text-white/40 hover:text-white/70 transition-colors text-sm"
+                >
+                  <Icon name="LogOut" size={16} />
+                </button>
+              </div>
+            ) : (
+              <>
+                <button onClick={() => setAuthOpen(true)} className="text-sm text-white/60 hover:text-white transition-colors px-4 py-2">Войти</button>
+                <button onClick={() => setAuthOpen(true)} className="btn-neon text-sm px-5 py-2 rounded-xl font-semibold">Попробовать бесплатно</button>
+              </>
+            )}
           </div>
 
           <button className="md:hidden text-white/70" onClick={() => setMobileMenu(!mobileMenu)}>
@@ -191,7 +225,7 @@ export default function Index() {
                 {n.label}
               </button>
             ))}
-            <button className="btn-neon mt-2 py-3 rounded-xl text-sm font-semibold">Попробовать бесплатно</button>
+            <button onClick={() => setAuthOpen(true)} className="btn-neon mt-2 py-3 rounded-xl text-sm font-semibold">Попробовать бесплатно</button>
           </div>
         )}
       </nav>
@@ -219,7 +253,7 @@ export default function Index() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up delay-300">
-            <button onClick={() => scrollTo("generator")} className="btn-neon px-8 py-4 rounded-2xl text-base font-semibold flex items-center gap-2 justify-center">
+            <button onClick={() => user ? scrollTo("generator") : setAuthOpen(true)} className="btn-neon px-8 py-4 rounded-2xl text-base font-semibold flex items-center gap-2 justify-center">
               <Icon name="Zap" size={18} />
               Попробовать бесплатно
             </button>
@@ -634,6 +668,12 @@ export default function Index() {
           <div className="text-white/20 text-xs">Сделано с ❤️ в России</div>
         </div>
       </footer>
+
+      <AuthModal
+        isOpen={authOpen}
+        onClose={() => setAuthOpen(false)}
+        onAuth={(u, _token) => setUser(u)}
+      />
     </div>
   );
 }
