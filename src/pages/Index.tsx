@@ -41,30 +41,39 @@ const EXAMPLES = [
 const PLANS = [
   {
     name: "Старт",
-    price: "0",
+    priceMonth: "0",
+    priceYear: "0",
+    priceYearTotal: "",
     period: "бесплатно",
     desc: "Для знакомства с сервисом",
     features: ["30 генераций / месяц", "3 тона голоса", "Базовые стили", "Экспорт в текст"],
     cta: "Начать бесплатно",
     highlight: false,
+    save: "",
   },
   {
     name: "Про",
-    price: "1 490",
+    priceMonth: "1 490",
+    priceYear: "990",
+    priceYearTotal: "11 880",
     period: "₽ / месяц",
     desc: "Для активного контент-мейкера",
     features: ["500 генераций / месяц", "Все тона и стили", "Настройка аудитории", "Ключевые слова SEO", "История генераций", "Приоритетная поддержка"],
     cta: "Выбрать Про",
     highlight: true,
+    save: "−34%",
   },
   {
     name: "Команда",
-    price: "4 990",
+    priceMonth: "4 990",
+    priceYear: "3 490",
+    priceYearTotal: "41 880",
     period: "₽ / месяц",
     desc: "Для агентств и команд",
     features: ["Безлимит генераций", "До 5 пользователей", "Брендбук и голос бренда", "API доступ", "Аналитика постов", "Персональный менеджер"],
     cta: "Связаться с нами",
     highlight: false,
+    save: "−30%",
   },
 ];
 
@@ -89,6 +98,8 @@ export default function Index() {
   const [generating, setGenerating] = useState(false);
   const [generatedText, setGeneratedText] = useState("");
   const [charCount, setCharCount] = useState(0);
+
+  const [billingYear, setBillingYear] = useState(false);
 
   const [contactName, setContactName] = useState("");
   const [contactEmail, setContactEmail] = useState("");
@@ -414,48 +425,79 @@ export default function Index() {
       {/* PRICING */}
       <section id="pricing" className="py-24 px-6">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14">
+          <div className="text-center mb-10">
             <div className="inline-flex items-center gap-2 glass rounded-full px-4 py-2 mb-4">
               <Icon name="CreditCard" size={14} className="text-neon" />
               <span className="text-white/60 text-xs uppercase tracking-widest">Тарифы</span>
             </div>
             <h2 className="font-oswald text-4xl md:text-5xl font-bold text-white mb-4">Выбери свой план</h2>
-            <p className="text-white/50 text-lg">Начни бесплатно, масштабируй по мере роста</p>
+            <p className="text-white/50 text-lg mb-8">Начни бесплатно, масштабируй по мере роста</p>
+
+            {/* Billing toggle */}
+            <div className="inline-flex items-center gap-4 glass rounded-2xl px-2 py-2">
+              <button
+                onClick={() => setBillingYear(false)}
+                className={`px-5 py-2 rounded-xl text-sm font-semibold transition-all ${!billingYear ? "bg-white/10 text-white" : "text-white/40 hover:text-white/70"}`}
+              >
+                Ежемесячно
+              </button>
+              <button
+                onClick={() => setBillingYear(true)}
+                className={`px-5 py-2 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 ${billingYear ? "bg-white/10 text-white" : "text-white/40 hover:text-white/70"}`}
+              >
+                Ежегодно
+                <span className="bg-neon text-background text-xs font-bold px-2 py-0.5 rounded-full">−30%</span>
+              </button>
+            </div>
           </div>
 
           <div className="grid md:grid-cols-3 gap-5 items-start">
-            {PLANS.map((plan, i) => (
-              <div key={i} className={`rounded-2xl p-6 relative ${plan.highlight ? "bg-neon/5 border border-neon/30" : "glass"}`}>
-                {plan.highlight && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-neon text-background text-xs font-bold px-4 py-1 rounded-full font-oswald">
-                    ПОПУЛЯРНЫЙ
-                  </div>
-                )}
-                <div className="mb-5">
-                  <h3 className="font-oswald text-xl font-bold text-white mb-1">{plan.name}</h3>
-                  <p className="text-white/40 text-sm mb-4">{plan.desc}</p>
-                  <div className="flex items-end gap-1">
-                    <span className={`font-oswald text-4xl font-bold ${plan.highlight ? "text-neon" : "text-white"}`}>{plan.price}</span>
-                    <span className="text-white/40 text-sm mb-1">{plan.period}</span>
-                  </div>
-                </div>
-
-                <div className="space-y-2.5 mb-6">
-                  {plan.features.map(f => (
-                    <div key={f} className="flex items-center gap-2.5">
-                      <div className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 ${plan.highlight ? "bg-neon/20" : "bg-white/5"}`}>
-                        <Icon name="Check" size={10} className={plan.highlight ? "text-neon" : "text-white/50"} />
-                      </div>
-                      <span className="text-white/60 text-sm">{f}</span>
+            {PLANS.map((plan, i) => {
+              const price = billingYear ? plan.priceYear : plan.priceMonth;
+              return (
+                <div key={i} className={`rounded-2xl p-6 relative ${plan.highlight ? "bg-neon/5 border border-neon/30" : "glass"}`}>
+                  {plan.highlight && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-neon text-background text-xs font-bold px-4 py-1 rounded-full font-oswald">
+                      ПОПУЛЯРНЫЙ
                     </div>
-                  ))}
-                </div>
+                  )}
+                  <div className="mb-5">
+                    <h3 className="font-oswald text-xl font-bold text-white mb-1">{plan.name}</h3>
+                    <p className="text-white/40 text-sm mb-4">{plan.desc}</p>
+                    <div className="flex items-end gap-2">
+                      <span className={`font-oswald text-4xl font-bold transition-all ${plan.highlight ? "text-neon" : "text-white"}`}>{price}</span>
+                      <div className="mb-1">
+                        <span className="text-white/40 text-sm block">{plan.period}</span>
+                        {billingYear && plan.priceYearTotal && (
+                          <span className="text-white/25 text-xs">{plan.priceYearTotal} ₽ / год</span>
+                        )}
+                      </div>
+                      {billingYear && plan.save && (
+                        <span className="mb-1 text-xs font-bold text-neon bg-neon/10 px-2 py-0.5 rounded-full">{plan.save}</span>
+                      )}
+                    </div>
+                    {!billingYear && plan.save && (
+                      <p className="text-white/30 text-xs mt-1">При годовой оплате — экономия {plan.save}</p>
+                    )}
+                  </div>
 
-                <button className={`w-full py-3 rounded-xl font-semibold text-sm transition-all ${plan.highlight ? "btn-neon" : "glass text-white/70 hover:text-white"}`}>
-                  {plan.cta}
-                </button>
-              </div>
-            ))}
+                  <div className="space-y-2.5 mb-6">
+                    {plan.features.map(f => (
+                      <div key={f} className="flex items-center gap-2.5">
+                        <div className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 ${plan.highlight ? "bg-neon/20" : "bg-white/5"}`}>
+                          <Icon name="Check" size={10} className={plan.highlight ? "text-neon" : "text-white/50"} />
+                        </div>
+                        <span className="text-white/60 text-sm">{f}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <button className={`w-full py-3 rounded-xl font-semibold text-sm transition-all ${plan.highlight ? "btn-neon" : "glass text-white/70 hover:text-white"}`}>
+                    {plan.cta}
+                  </button>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
